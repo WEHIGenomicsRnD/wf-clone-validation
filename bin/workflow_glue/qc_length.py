@@ -17,7 +17,8 @@ def main(args):
    ## Parsing Histogram files to get the highest peak
    fname=anal_path.strip().split("/")[-2]
 
-   qc_rules="/vast/scratch/users/gupta.i/forked_wf/wf-clone-validation/qc_rules.txt"
+#   qc_rules="/vast/scratch/users/gupta.i/forked_wf/wf-clone-validation/qc_rules.txt"
+   qc_rules=args.rule_file
    rules_df=pd.read_csv(qc_rules,header=None,delimiter="\t")
 
    outfile=f"sample_QC.txt"
@@ -96,6 +97,7 @@ def argparser():
     parser = wf_parser("eval_qc")
 #    parser = argparse.ArgumentParser()
     parser.add_argument('-f','--anal_folder', help='Path to analysis folder')
+    parser.add_argument('-q','--rule_file', help='QC rule file')
     return parser
 
 

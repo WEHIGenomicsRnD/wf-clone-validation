@@ -11,6 +11,7 @@ if (params.assembly_tool == 'canu'){
 }
 
 OPTIONAL_FILE = file("$projectDir/data/OPTIONAL_FILE")
+qc_rules = file("$projectDir/qc_rules.txt")
 
 process checkIfEnoughReads {
     label "wfplasmid"
@@ -19,6 +20,7 @@ process checkIfEnoughReads {
     input:
         tuple val(meta), path("input.fastq.gz"), path("fastcat_stats")
     output:
+        path("${meta.alias}.length_hist"), emit: hist
         tuple val(meta), path("${meta.alias}.fastq.gz"),
             optional: true, emit: sample
         path("${meta.alias}.fastcat_stats"), emit: stats
@@ -34,6 +36,7 @@ process checkIfEnoughReads {
         int bgzip_threads = task.cpus == 1 ? 1 : task.cpus - 1
     """
     STATUS="Failed due to insufficient reads"
+    cp fastcat_stats/length.hist "${meta.alias}.length_hist"
     mv fastcat_stats "${meta.alias}.fastcat_stats"
     fastcat -s ${meta.alias} -r ${meta.alias}.interim $extra_args input.fastq.gz \
     | bgzip -@ $bgzip_threads > interim.fastq.gz
@@ -42,6 +45,19 @@ process checkIfEnoughReads {
         STATUS="Completed successfully"
     fi
     """
+}
+
+
+process getqc {
+    label "plasmidQC"
+    input:
+       tuple path("sample_status.txt")
+    output: 
+       path "sample_QC.txt", emit: qc
+    script:
+       """
+       workflow-glue qc_length --anal_folder ${params.out_dir} --rule_file ${qc_rules}
+       """
 }
 
 
@@ -71,7 +87,7 @@ process filterHostReads {
     samtools fastq unmapped.bam > ${name}.filtered.fastq
     fastcat -s ${name} -r ${name}.interim ${name}.filtered.fastq > /dev/null
     if [[ "\$(wc -l <"${name}.interim")" -ge "1" ]];  then
-        mv ${name}.interim ${name}.stats
+        mv n${name}.interim ${name}.stats
     fi
     if [[ -f "$regs" ]]; then
         bedtools intersect -a mapped.bam -b $regs -wa \
@@ -606,6 +622,8 @@ workflow pipeline {
             filtered_stats = OPTIONAL_FILE
         }
 
+        sample_hist=sample_fastqs.hist
+
         // Core assembly and reconciliation
         assemblies = assembleCore(samples_filtered)
         named_drafts = assemblies.assembly.groupTuple()
@@ -695,7 +713,8 @@ workflow pipeline {
         // Can't collect whole meta likely due to full_ref and insert_ref
         // Causes java.lang.StackOverflowError in JsonBuilder so keeping only those used in report
         meta = samples.map{ meta, reads, stats -> ["alias": meta.alias, "n_seqs": meta.n_seqs] }.collect()
-
+  
+        
         report = report(
             meta,
             downsampled_stats.collect().ifEmpty(OPTIONAL_FILE),
@@ -717,7 +736,9 @@ workflow pipeline {
             cutsite_csv,
             insert_qc_tuple.insert_align_stats.collect().ifEmpty(OPTIONAL_FILE)
             )
-
+      
+        plasmid_qc=getqc(report.sample_stat)
+        qc_res=plasmid_qc.qc
         results = reorientated.fasta.map { meta, polished -> polished }.concat(
             report.html,
             report.sample_stat,
@@ -734,6 +755,8 @@ workflow pipeline {
             full_assembly_stats,
             bcf,
             ref_bamstats,
+            sample_hist,
+            qc_res,
             assembly_quality.collect(),
             mafs.map{ meta, maf -> maf}.collect()
         )
