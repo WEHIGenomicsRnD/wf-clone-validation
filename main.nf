@@ -50,6 +50,7 @@ process checkIfEnoughReads {
 
 process getqc {
     label "plasmidQC"
+
     input:
        tuple path("sample_status.txt")
     output: 
