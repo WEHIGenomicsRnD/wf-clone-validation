@@ -1,6 +1,7 @@
-Rule1	test_lower <= x <= test_upper	peak_lower <= x <= peak_upper	PASS
-Rule2	(test_lower <= x <= test_upper)	not (peak_lower <= x < peak_upper) and (peak_lower < test_lower)	PASS
+Rule1	((test_lower <= x <= test_upper) or (x > test_lower))	peak_lower <= x <= peak_upper	PASS
+Rule2	((test_lower <= x <= test_upper) or (x < test_lower < test_upper))	not (peak_lower <= x < peak_upper) and (peak_lower < test_lower)	PASS
 Rule3	(test_lower <= x <= test_upper)	not (peak_lower <= x < peak_upper)	The read length after subsampling doesnot match the input plasmid size
 Rule4	not (peak_lower <= x <= peak_upper)	(peak_lower <= test_lower < peak_upper)	The read length after subsampling doesnot match the input plasmid size but matching with readlength after assembly
-Rule5	not (peak_lower <= x <= peak_upper)	not (test_lower <= x <= test_upper)	FAIL
-Rule6	(peak_lower <= x <= peak_upper)	not (test_lower <= x <= test_upper)	Rerun
+Rule5	not (peak_lower <= x <= peak_upper)	not (test_lower <= x <= test_upper) and (x < test_lower) 	FAIL
+Rule6	(peak_lower <= x <= peak_upper)	not (test_lower <= x <= test_upper) and not (test_lower > x)	Rerun
+Rule7	(peak_lower <= x <= peak_upper)	(test_lower > x) and (x < test_upper)	PASS
