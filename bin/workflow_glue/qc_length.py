@@ -4,12 +4,12 @@ import argparse
 import os
 import pandas as pd
 import glob
-
+import time
 
 from .util import get_named_logger, wf_parser
 #parser = argparse.ArgumentParser()
 #Gparser.add_argument('-f','--anal_folder', help='Path to analysis folder')
-
+time.sleep(5)
 
 def main(args):
 
@@ -35,7 +35,7 @@ def main(args):
       upper=round(df2 * 1.2,2)
       hist_dict[fname]=[lower,upper,df2]
 
-   print(hist_dict)
+   print(f"Hist {hist_dict}")
    ## Parsing assembly length file
 
    af_dict={}
@@ -62,17 +62,19 @@ def main(args):
    for r in range(len(user_df)):
        user_dict[user_df['alias'][r]]=[user_df['barcode'][r],user_df['alias'][r],user_df['approx_size'][r]]
 
-   print(user_dict)
+   print(f"user: {user_dict}")
 
    ## Checking the rules for each sample
 
    res={}
    for k,v in user_dict.items():
+       if k not in hist_dict:
+           hist_dict[k]=[0,0,0]
        x=user_dict[k][2]
        test_lower=af_dict[k][0]
        test_upper=af_dict[k][1]
        peak_lower=hist_dict[k][0]
-       peak_upper=hist_dict[k][1]
+       peak_upper=hist_dict[k][0]
        print(f"Rules -- {test_lower} -- {test_upper}--{x} -- {peak_lower}-- {peak_upper}")
        for r in range(len(rules_df)):
           rule_c1=rules_df[1][r]
