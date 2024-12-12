@@ -29,7 +29,7 @@ def main(args):
    hist_files=f"{anal_path}/*.length_hist"
    for file in glob.glob(hist_files):
       fname=os.path.splitext(os.path.basename(file))[0]
-      df=pd.read_csv(file,header=None,delimiter="\t")
+      df=pd.read_csv(file,header=None,delimiter="\t",skiprows=200)
       df2=df.loc[df[2].idxmax()][1]
       lower=round(df2 * .9,2)
       upper=round(df2 * 1.2,2)
