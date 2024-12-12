@@ -52,12 +52,12 @@ process getqc {
     label "plasmidQC"
 
     input:
-       tuple path("sample_status.txt")
+       tuple path(sample_stat)
     output: 
        path "sample_QC.txt", emit: qc
     script:
        """
-       workflow-glue qc_length --anal_folder ${params.out_dir} --rule_file ${qc_rules}
+       workflow-glue qc_length --anal_folder ${params.out_dir} --rule_file ${qc_rules} --stats $sample_stat
        """
 }
 

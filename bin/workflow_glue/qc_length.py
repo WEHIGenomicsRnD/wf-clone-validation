@@ -39,7 +39,7 @@ def main(args):
    ## Parsing assembly length file
 
    af_dict={}
-   assm_file=f"{anal_path}/sample_status.txt"
+   assm_file=args.stats
 
    asm_df=pd.read_csv(assm_file,header=0)
    for r in range(len(asm_df)):
@@ -100,6 +100,7 @@ def argparser():
 #    parser = argparse.ArgumentParser()
     parser.add_argument('-f','--anal_folder', help='Path to analysis folder')
     parser.add_argument('-q','--rule_file', help='QC rule file')
+    parser.add_argument('-s','--stats', help='Stats file')
     return parser
 
 
