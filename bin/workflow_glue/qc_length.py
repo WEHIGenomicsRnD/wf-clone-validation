@@ -27,7 +27,7 @@ def main(args):
 
    hist_dict={}
    hist_files=f"{anal_path}/*.length_hist"
-   for file in glob.glob(hist_files):
+   for file in args.hist_file:
       fname=os.path.splitext(os.path.basename(file))[0]
       df=pd.read_csv(file,header=None,delimiter="\t",skiprows=200)
       df2=df.loc[df[2].idxmax()][1]
@@ -101,6 +101,7 @@ def argparser():
     parser.add_argument('-f','--anal_folder', help='Path to analysis folder')
     parser.add_argument('-q','--rule_file', help='QC rule file')
     parser.add_argument('-s','--stats', help='Stats file')
+    parser.add_argument('-h','--hist_file', help='Histogram file')
     return parser
 
 

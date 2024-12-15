@@ -53,11 +53,12 @@ process getqc {
 
     input:
        tuple path(sample_stat)
+       path "hist_files/*"
     output: 
        path "sample_QC.txt", emit: qc
     script:
        """
-       workflow-glue qc_length --anal_folder ${params.out_dir} --rule_file ${qc_rules} --stats $sample_stat
+       workflow-glue qc_length --anal_folder ${params.out_dir} --rule_file ${qc_rules} --stats $sample_stat --hist_file hist_files/*
        """
 }
 
@@ -737,8 +738,9 @@ workflow pipeline {
             cutsite_csv,
             insert_qc_tuple.insert_align_stats.collect().ifEmpty(OPTIONAL_FILE)
             )
-      
-        plasmid_qc=getqc(report.sample_stat)
+     
+        hist_files=sample_hist.collect() 
+        plasmid_qc=getqc(report.sample_stat,hist_files)
         qc_res=plasmid_qc.qc
         results = reorientated.fasta.map { meta, polished -> polished }.concat(
             report.html,
