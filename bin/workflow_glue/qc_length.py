@@ -101,7 +101,7 @@ def argparser():
     parser.add_argument('-f','--anal_folder', help='Path to analysis folder')
     parser.add_argument('-q','--rule_file', help='QC rule file')
     parser.add_argument('-s','--stats', help='Stats file')
-    parser.add_argument('-h','--hist_file', help='Histogram file')
+    parser.add_argument('-r','--hist_file', help='Histogram file',nargs='+')
     return parser
 
 
