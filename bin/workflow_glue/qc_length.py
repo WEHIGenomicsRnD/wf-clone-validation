@@ -45,12 +45,8 @@ def main(args):
    for r in range(len(asm_df)):
       size=asm_df['Length'][r]
       if 'nan' in str(size):
-        lower=0
-        upper=10
-      else:
-       lower= size - 10
-       upper= round(size * 1.2,2)
-      af_dict[asm_df['Sample'][r]]=[lower,upper,asm_df['Length'][r]]
+        size=0
+      af_dict[asm_df['Sample'][r]]=[size]
 
    print(f"AF-- {af_dict}")
    ## Parsing user define length file
@@ -60,7 +56,10 @@ def main(args):
 
    user_df=pd.read_csv(user_file,header=0)
    for r in range(len(user_df)):
-       user_dict[user_df['alias'][r]]=[user_df['barcode'][r],user_df['alias'][r],user_df['approx_size'][r]]
+       size= user_df['approx_size'][r]
+       lower= size - 10
+       upper= round(size * 1.2,2)
+       user_dict[user_df['alias'][r]]=[lower,upper,size]
 
    print(f"user: {user_dict}")
 
@@ -70,18 +69,18 @@ def main(args):
    for k,v in user_dict.items():
        if k not in hist_dict:
            hist_dict[k]=[0,0,0]
-       x=user_dict[k][2]
-       test_lower=af_dict[k][0]
-       test_upper=af_dict[k][1]
+       x=af_dict[k][0]
+       test_lower=user_dict[k][0]
+       test_upper=user_dict[k][1]
        peak_lower=hist_dict[k][0]
-       peak_upper=hist_dict[k][0]
-       print(f"Rules -- {test_lower} -- {test_upper}--{x} -- {peak_lower}-- {peak_upper}")
+       peak_upper=hist_dict[k][1]
+       print(f"Rules {k} -- {test_lower} -- {test_upper}--{x} -- {peak_lower}-- {peak_upper}")
        for r in range(len(rules_df)):
           rule_c1=rules_df[1][r]
           rule_c2=rules_df[2][r]
 #         print(f"Rules -- {rule_c1}   --- {rule_c2}--{x} -- {peak_lower}-- {peak_upper}")
           if eval(rule_c1) and eval(rule_c2):
-             res[k]=[k,x,hist_dict[k][2],af_dict[k][2],rules_df[3][r]]
+             res[k]=[k,user_dict[k][2],hist_dict[k][2],af_dict[k][0],rules_df[3][r]]
              break
 #         else:
 #           print(f"No rule for sample {k}")
