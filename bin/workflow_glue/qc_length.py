@@ -8,7 +8,7 @@ import time
 
 from .util import get_named_logger, wf_parser
 #parser = argparse.ArgumentParser()
-#Gparser.add_argument('-f','--anal_folder', help='Path to analysis folder')
+#parser.add_argument('-f','--anal_folder', help='Path to analysis folder')
 time.sleep(5)
 
 def main(args):
@@ -44,11 +44,12 @@ def main(args):
    asm_df=pd.read_csv(assm_file,header=0)
    for r in range(len(asm_df)):
       size=asm_df['Length'][r]
+      reason = asm_df['Assembly completed / failed reason'][r]
       if 'nan' in str(size):
         size=0
-      af_dict[asm_df['Sample'][r]]=[size]
+      af_dict[asm_df['Sample'][r]]=[size,reason]
 
-   print(f"AF-- {af_dict}")
+#   print(f"AF-- {af_dict}")
    ## Parsing user define length file
 
    user_dict={}
@@ -57,11 +58,11 @@ def main(args):
    user_df=pd.read_csv(user_file,header=0)
    for r in range(len(user_df)):
        size= user_df['approx_size'][r]
-       lower= size - 10
+       lower= size - 20
        upper= round(size * 1.2,2)
        user_dict[user_df['alias'][r]]=[lower,upper,size]
 
-   print(f"user: {user_dict}")
+#   print(f"user: {user_dict}")
 
    ## Checking the rules for each sample
 
@@ -70,20 +71,25 @@ def main(args):
        if k not in hist_dict:
            hist_dict[k]=[0,0,0]
        x=af_dict[k][0]
+       reason=af_dict[k][1]
        test_lower=user_dict[k][0]
        test_upper=user_dict[k][1]
+       exact = user_dict[k][2]
        peak_lower=hist_dict[k][0]
        peak_upper=hist_dict[k][1]
-       print(f"Rules {k} -- {test_lower} -- {test_upper}--{x} -- {peak_lower}-- {peak_upper}")
+#       print(f"Rules {k} -- {test_lower} -- {test_upper}--{x} -- {peak_lower}-- {peak_upper} ")
        for r in range(len(rules_df)):
           rule_c1=rules_df[1][r]
           rule_c2=rules_df[2][r]
-#         print(f"Rules -- {rule_c1}   --- {rule_c2}--{x} -- {peak_lower}-- {peak_upper}")
+#          print(f"Rules -- {rule_c1}   --- {rule_c2}-- {test_lower} -- {test_upper} -- {x} -- {peak_lower}-- {peak_upper}")
           if eval(rule_c1) and eval(rule_c2):
-             res[k]=[k,user_dict[k][2],hist_dict[k][2],af_dict[k][0],rules_df[3][r]]
+             status=rules_df[3][r]
+             if reason not in 'Completed successfully':
+                 status=reason
+             res[k]=[k,user_dict[k][2],hist_dict[k][2],af_dict[k][0],status]
              break
-#         else:
-#           print(f"No rule for sample {k}")
+#          else:
+#             print(f"No rule for sample {k}")
 
 #print(res)
 ##Writing results to file

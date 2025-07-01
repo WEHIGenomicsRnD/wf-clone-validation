@@ -1,7 +1,11 @@
-Rule1	((test_lower <= x <= test_upper) or (x > test_lower))	peak_lower <= x <= peak_upper	PASS
-Rule2	((test_lower <= x <= test_upper) or (x < test_lower < test_upper))	not (peak_lower <= x < peak_upper) and (peak_lower < test_lower)	PASS
-Rule3	(test_lower <= x <= test_upper)	not (peak_lower <= x < peak_upper)	The read length after subsampling doesnot match the input plasmid size
-Rule4	not (peak_lower <= x <= peak_upper)	(peak_lower <= test_lower < peak_upper)	The read length after subsampling doesnot match the input plasmid size but matching with readlength after assembly
-Rule5	not (peak_lower <= x <= peak_upper)	not (test_lower <= x <= test_upper) and (x < test_lower) 	FAIL
-Rule6	(peak_lower <= x <= peak_upper)	not (test_lower <= x <= test_upper) and (test_lower > x)	Rerun
-Rule7	(peak_lower <= x <= peak_upper)	(test_lower > x) and (x < test_upper)	PASS
+Rule1	((x >= exact))	peak_lower <= x <= peak_upper	PASS
+Rule2	(x >= exact) and not(x > test_upper)	(not (peak_lower <= x < peak_upper) and (peak_lower < test_lower))	PASS
+Rule3	((test_lower <= x <= exact))	peak_lower <= x <= peak_upper	WARNING:The assembly size is few bases less than the user defined plasmid size
+Rule4	((test_lower <= x <= exact  ))	not (peak_lower <= x < peak_upper) and (peak_lower < test_lower)	WARNING:The assembly size is few bases less than the user defined plasmid size
+Rule5	(test_lower <= x <= test_upper)	not (peak_lower <= x < peak_upper)	The construct size is in confirmity with user defined plasmid size and is not closer to the reference length (infered from the raw fastq file)
+Rule6	(peak_lower <= x <= peak_upper)	(peak_lower <= test_lower < peak_upper)	The construct size is closer to the reference length (infered from the raw fastq file)
+Rule7	not (peak_lower <= x <= peak_upper) and not (peak_lower <= test_lower < peak_upper)	not (test_lower <= x <= test_upper) and (x < test_lower or x > test_upper)	FAIL (The construct size is different from user defined and reference plasmid size. You can still check if this plasmid size is useful to you.)
+Rule8	(peak_lower <= x <= peak_upper)	not (test_lower <= x <= test_upper) and (test_lower > x)	Rerun
+Rule9	(peak_lower <= x <= peak_upper)	(test_lower > x) and (x < test_upper)	WARNING:The assembly size is few bases less than the user defined plasmid size
+Rule10	(peak_lower <= test_lower < peak_upper)	(x > peak_upper)	Rerun
+Rule11	not (peak_lower <= x <= peak_upper)	(peak_lower <= test_lower < peak_upper)	Rerun
